@@ -2,20 +2,16 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- Libraries for generic input range calculation 
-use ieee.math_real."ceil";
-use ieee.math_real."log2";
-
-
 entity gen_counter is
 
     generic(
-        LIMIT: integer := 1040
+        LIMIT: integer := 1040;
+        COUNTER_BITS: integer := 11;
     );
 
     port(
         rst, clk, en: in std_logic;
-        y: out std_logic_vector(integer(ceil(log2(real(LIMIT))))-1 downto 0));
+        y: out std_logic_vector(COUNTER_BITS-1 downto 0));
 
 end entity;
 
