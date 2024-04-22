@@ -6,17 +6,17 @@ entity gen_counter is
 
     generic(
         LIMIT: integer := 1040;
-        COUNTER_BITS: integer := 11;
+        COUNTER_LENGTH: integer := 11;
     );
 
     port(
         rst, clk, en: in std_logic;
-        y: out std_logic_vector(COUNTER_BITS-1 downto 0));
+        y: out std_logic_vector(COUNTER_LENGTH-1 downto 0));
 
 end entity;
 
 architecture imp of gen_counter is
-    signal count: unsigned(y'range);
+    signal count: unsigned(y);
 
 begin
     process(clk, rst, en)
