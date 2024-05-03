@@ -6,7 +6,7 @@ entity gen_counter is
 
     generic(
         LIMIT: integer := 1040;
-        COUNTER_LENGTH: integer := 11;
+        COUNTER_LENGTH: integer := 11
     );
 
     port(
@@ -23,13 +23,13 @@ begin
         variable count: natural range 0 to LIMIT;
     begin
         if rst = '1' then 
-            count <= 0;
+            count := 0;
         elsif rising_edge(clk) then
             if en = '1' then
                 if count = LIMIT then
-                    count <= 0;
+                    count := 0;
                 else
-                    count <= count + 1;
+                    count := count + 1;
                 end if;
             end if;
         end if;

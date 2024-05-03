@@ -24,14 +24,13 @@ begin
 end entity gen_sync;
 
 architecture imp of gen_sync is
-    signal count: unsigned(COUNTER_LENGTH-1 downto 0);
-    signal 
+    signal count: INTEGER range 0 to COUNTER_LENGTH;
 begin
-    count <= unsigned(c);
+    count <= to_integer(unsigned(c));
 
     with count select
-        sync =>
-            '0' when 0
+        sync <=
+            '0' when 0,
             '1' when LOW - 1,
             unaffected when others;
 
