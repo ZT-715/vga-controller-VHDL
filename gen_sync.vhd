@@ -6,7 +6,8 @@ use ieee.numeric_std.all;
 entity gen_sync is
     generic(
     -- pixel count of each interval
-        LOW, PULSE natural := (120, 800 + 56);
+        LOW: natural := 120;
+        PULSE: natural :=  800;
         COUNTER_LENGTH: natural := 11
     );
 
