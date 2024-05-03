@@ -16,24 +16,25 @@ entity gen_counter is
 end entity;
 
 architecture imp of gen_counter is
-    signal count: unsigned(y);
-
+    signal count: unsigned(COUNTER_LENGTH-1 downto 0);
 begin
+    
     process(clk, rst, en)
+        variable count: natural range 0 to LIMIT;
     begin
         if rst = '1' then 
-            count <= (others => '0');
+            count <= 0;
         elsif rising_edge(clk) then
             if en = '1' then
-                if count = LIMIT - 1 then
-                    count <= (others => '0');
+                if count = LIMIT then
+                    count <= 0;
                 else
                     count <= count + 1;
                 end if;
             end if;
         end if;
+        y <= std_logic_vector(to_unsigned(count, COUNTER_LENGTH));
     end process;
 
-    y <= std_logic_vector(count);
 
 end architecture;
