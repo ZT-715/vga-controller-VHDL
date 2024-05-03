@@ -7,7 +7,6 @@ entity gen_sync is
     generic(
     -- pixel count of each interval
         LOW: natural := 120;
-        PULSE: natural :=  800;
         COUNTER_LENGTH: natural := 11
     );
 
@@ -18,7 +17,7 @@ entity gen_sync is
 
 begin
 
-    assert LOW + PULSE <= 2**COUNTER_LENGTH
+    assert LOW <= 2**COUNTER_LENGTH
     report "Counter range doesnt reach total time range."
     severity failure;
 

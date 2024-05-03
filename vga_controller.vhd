@@ -4,15 +4,21 @@ use ieee.std_logic_1164.all;
 entity vga_controller is
 
     generic(
-        H_ADDRESSABLE, H_FRON_PORCH, H_SYNC, H_BACH_PORCH: integer := ();
-        V_ADDRESSABLE, V_FRON_PORCH, V_SYNC, V_BACV_PORCH: integer := ();
+        H_ADDRESSABLE: natural := 800;
+        H_FRON_PORCH: natural := 56; 
+        H_SYNC: natural := 120; 
+        H_BACH_PORCH: natural := 64;
 
-        H_COUNTER_LENGTH: integer := ;
-        V_COUNTER_LENGTH: integer := ;
+        V_ADDRESSABLE: natural := 600; 
+        V_FRON_PORCH: natural := 37; 
+        V_SYNC: natural := 6; 
+        V_BACV_PORCH: natural := 23;
 
-        ADDR_LINE_LENGTH: integer := ;
-        ADDR_COLUMN_LENGTH: integer := ;
-        
+        H_COUNTER_LENGTH: natural := 11;
+        V_COUNTER_LENGTH: natural := 10;
+
+        ADDR_LINE_LENGTH: natural := 10;
+        ADDR_COLUMN_LENGTH: natural := 10;   
     );
     port(
         rst, clk: in std_logic;
@@ -34,8 +40,7 @@ architecture imp of vga_controller is
     signal v_addressable, h_addressable: std_logic;
 
     -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
-    v_enable <= '1' when h_counter = H_ADDRESSABLE + H_FRON_PORCH + H_SYNC
-                + H_BACH_PORCH - 1 else '0';
+    v_enable <= '1' when h_counter = 0 else '0';
 
 --     h_address <= std_logic_vector(h_counter(ADDR_LINE_LENGTH-1 downto 0));
 --     v_address <= std_logic_vector(v_counter(ADDR_COLUMN_LENGTH-1 downto 0));
@@ -51,16 +56,14 @@ architecture imp of vga_controller is
 
     -- Gera indicador de sincronismo horizontal
     h_sync: entity work.gen_sync(imp)
-            generic map(LOW => H_ADDRESSABLE + H_FRONT_PORT,
-                        PULSE => H_SYNC, 
+            generic map(LOW =>  H_SYNC,
                         COUNTER_LENGHT => H_COUNTER_LENGTH)
             port map(c => std_logic_vector(h_counter),
                      sync => hsync);
 
     -- Gera indicador de zone horizontal endereçável
     h_addressable: entity work.gen_sync(imp)
-            generic map(LOW => 0,
-                        PULSE => H_ADDRESSABLE, 
+            generic map(LOW => H_FRON_PORCH + H_SYNC + H_BACH_PORCH,
                         COUNTER_LENGHT => H_COUNTER_LENGTH)
             port map(c => std_logic_vector(h_counter),
                      sync => h_addressable);
@@ -86,16 +89,14 @@ architecture imp of vga_controller is
 
     -- Gera indicador de sincronia vertical
     v_sync: entity work.gen_sync(imp)
-            generic map(LOW => V_ADDRESSABLE + V_FRONT_PORT,
-                        PULSE => V_SYNC, 
+            generic map(LOW =>  V_SYNC, 
                         COUNTER_LENGHT => V_COUNTER_LENGTH)
             port map(c => std_logic_vector(v_counter),
                     sync => vsync);
  
     -- Gera indicador de zona vertical endereçável
     v_addressable: entity work.gen_sync(imp)
-            generic map(LOW => 0,
-                        PULSE => V_ADDRESSABLE, 
+            generic map(LOW => V_FRON_PORCH + V_SYNC + V_BACV_PORCH, 
                         COUNTER_LENGHT => V_COUNTER_LENGTH)
             port map(c => std_logic_vector(v_counter),
                      sync => v_addressable);      
