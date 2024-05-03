@@ -6,8 +6,8 @@ use ieee.numeric_std.all;
 entity gen_sync is
     generic(
     -- pixel count of each interval
-        LOW, PULSE integer := (800 + 56, 120);
-        COUNTER_LENGTH: integer := 11
+        LOW, PULSE natural := (120, 800 + 56);
+        COUNTER_LENGTH: natural := 11
     );
 
     port(
@@ -31,9 +31,8 @@ begin
 
     with count select
         sync =>
-            '1' when 0,
-            '0' when LOW - 1,
-            '1' when LOW+PULSE - 1,
+            '0' when 0
+            '1' when LOW - 1,
             unaffected when others;
 
 end architecture;
