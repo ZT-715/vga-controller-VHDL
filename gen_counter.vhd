@@ -11,6 +11,13 @@ entity gen_counter is
         rst, clk, en   : in  std_logic;
         y              : out std_logic_vector(COUNTER_LENGTH-1 downto 0)
     );
+
+	 begin
+	 
+	 assert 2**COUNTER_LENGTH - 1 >= LIMIT
+	 report "COUNTER_LENGHT too small for LIMIT value"
+	 severity failure;
+	 
 end entity;
 
 architecture imp of gen_counter is
