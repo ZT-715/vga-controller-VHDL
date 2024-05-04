@@ -64,14 +64,18 @@ begin
     horizontal_sync: entity work.gen_sync(imp)
             generic map(LOW =>  H_SYNC,
                         COUNTER_LENGTH => H_COUNTER_LENGTH)
-            port map(c => std_logic_vector(h_counter),
+            port map(clk => clk,
+							rst => rst,
+							c => std_logic_vector(h_counter),
                      sync => hsync);
 
     -- Gera indicador de zone horizontal endereçável
     horizontal_address: entity work.gen_sync(imp)
             generic map(LOW => H_FRON_PORCH + H_SYNC + H_BACH_PORCH,
                         COUNTER_LENGTH => H_COUNTER_LENGTH)
-            port map(c => std_logic_vector(h_counter),
+            port map(clk => clk,
+							rst => rst,
+							c => std_logic_vector(h_counter),
                      sync => h_addressing);
 
     -- Contagem de pixels endereçáveis 
@@ -96,14 +100,18 @@ begin
     vertical_sync: entity work.gen_sync(imp)
             generic map(LOW =>  V_SYNC, 
                         COUNTER_LENGTH => V_COUNTER_LENGTH)
-            port map(c => (v_counter),
-                    sync => vsync);
+            port map(clk => clk,
+							rst => rst,
+							c => (v_counter),
+                     sync => vsync);
  
     -- Gera indicador de zona vertical endereçável
     vertical_address: entity work.gen_sync(imp)
             generic map(LOW => V_FRON_PORCH + V_SYNC + V_BACV_PORCH, 
                         COUNTER_LENGTH => V_COUNTER_LENGTH)
-            port map(c => (v_counter),
+            port map(clk => clk,
+							rst => rst,
+							c => (v_counter),
                      sync => v_addressing);      
 
     -- Contagem de linhas endereçáveis 
@@ -113,6 +121,6 @@ begin
             port map(rst => rst,
                      clk => clk,
                      en => v_addressing,
-                     y => (v_address));
+                     y => v_address);
 
 end architecture;
