@@ -11,29 +11,57 @@ entity gen_sync is
     );
 
     port(
-        c: in std_logic_vector(COUNTER_LENGTH-1 downto 0);
+        rst, clk: in std_logic; 
+		  c: in std_logic_vector(COUNTER_LENGTH-1 downto 0);
         sync: out std_logic
     );
-
-begin
-
-    assert LOW <= 2**COUNTER_LENGTH
-    report "Counter range doesnt reach total time range."
-    severity failure;
 
 end entity gen_sync;
 
 architecture imp of gen_sync is
-    signal count: INTEGER range 0 to COUNTER_LENGTH;
+	signal count: unsigned(COUNTER_LENGTH - 1 downto 0);
+	signal d: std_logic;
 begin
-    count <= to_integer(unsigned(c));
+	
+    count <= (unsigned(c));
 
-    with count select
-        sync <=
-            '0' when 0,
-            '1' when LOW - 1,
-            unaffected when others;
+	process(count)
+	begin
+		-- report integer'image(count);
+		if(count >= LOW-2) then
+			d <= '1';
+		else 
+		  d <= '0';
+		end if;
+	end process;
+   			 
+   sync <= d;
 
 end architecture;
-    
+
+--architecture imp2 of gen_sync is
+--	signal count: unsigned(COUNTER_LENGTH - 1 downto 0);
+--	signal d, q: std_logic;
+--begin
+--	
+--	 dff: entity work.dflipflop(imp) port map(rst, clk, d, q);
+--
+--    count <= (unsigned(c));
+--
+--	process(count, q)
+--	begin
+--		-- report integer'image(count);
+--		if(count = 0) then
+--			d <= '0';
+--		elsif(count = LOW-2) then
+--			d <= '1';
+--		else
+--			d <= q;
+--		end if;
+--	end process;
+--   			 
+--   sync <= q;
+--
+--end architecture;
+--    
 

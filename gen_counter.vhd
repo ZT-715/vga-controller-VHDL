@@ -14,7 +14,7 @@ entity gen_counter is
 
 	 begin
 	 
-	 assert 2**COUNTER_LENGTH - 1 >= LIMIT
+	 assert (2**COUNTER_LENGTH - 1) >= LIMIT
 	 report "COUNTER_LENGHT too small for LIMIT value"
 	 severity failure;
 	 
@@ -23,16 +23,15 @@ end entity;
 architecture imp of gen_counter is
 begin
     process(clk)
-	 variable count: natural range 0 to LIMIT := 0;
+	  variable count: natural range 0 to LIMIT := 0;
     begin
         if rising_edge(clk) then
             if rst = '1' then
                 count := 0; 
             elsif en = '1' then
+                count := count + 1;
                 if count = LIMIT then
                     count := 0;
-                else
-                    count := count + 1;
                 end if;
             end if;
         end if;
