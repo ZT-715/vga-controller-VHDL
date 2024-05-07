@@ -6,7 +6,7 @@ use ieee.numeric_std.all;
 entity gen_sync is
     generic(
     -- pixel count of each interval
-        LOW: natural := 120;
+        LOW_COUNT: natural := 120;
         COUNTER_LENGTH: natural := 11
     );
 
@@ -15,20 +15,37 @@ entity gen_sync is
 		  c: in std_logic_vector(COUNTER_LENGTH-1 downto 0);
         sync: out std_logic
     );
-
+	 
 end entity gen_sync;
 
+architecture tb of gen_sync is
+	-- signal count: integer range 0 to 2**COUNTER_LENGTH - 1;
+begin
+	
+--    count <= to_integer(unsigned(c));
+
+	process
+	begin
+	sync <= '0';
+--	report integer'image(count) & "Start";
+	wait for LOW_COUNT * 20 ns;
+	sync <= '1';
+--	report integer'image(count) & "End sync";
+	end process;
+   			 
+end architecture;
+
 architecture imp of gen_sync is
-	signal count: unsigned(COUNTER_LENGTH - 1 downto 0);
+	signal count: integer range 0 to 2**COUNTER_LENGTH - 1;
 	signal d: std_logic;
 begin
 	
-    count <= (unsigned(c));
+    count <= to_integer(unsigned(c));
 
 	process(count)
 	begin
-		-- report integer'image(count);
-		if(count >= LOW-2) then
+--		report integer'image(count);
+		if(count >= LOW_COUNT-1) then
 			d <= '1';
 		else 
 		  d <= '0';
