@@ -38,15 +38,17 @@ architecture imp of vga_controller is
 
     signal v_enable: std_logic;
     signal v_addressing, h_addressing: std_logic;
+	 
+	 constant H_COUNTER_START: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := (others => '0');
 
 begin
 
-    r <= (others => '1') ;
+    r <= (others => '1');
     g <= (others => '1');
     b <= (others => '1');
 
     -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
-    v_enable <= '1' when unsigned(h_counter) = 0 else '0';
+    v_enable <= '1' when h_counter(H_COUNTER_LENGTH - 1 downto 1) = H_COUNTER_START(H_COUNTER_LENGTH - 1 downto 1) else '0';
 
 --     h_address <= std_logic_vector(h_counter(ADDR_LINE_LENGTH-1 downto 0));
 --     v_address <= std_logic_vector(v_counter(ADDR_COLUMN_LENGTH-1 downto 0));
@@ -62,25 +64,25 @@ begin
 
     -- Gera indicador de sincronismo horizontal
     horizontal_sync: entity work.gen_sync(imp)
-            generic map(LOW =>  H_SYNC,
+            generic map(LOW_COUNT =>  H_SYNC,
                         COUNTER_LENGTH => H_COUNTER_LENGTH)
             port map(clk => clk,
 							rst => rst,
-							c => std_logic_vector(h_counter),
+							c => h_counter,
                      sync => hsync);
 
     -- Gera indicador de zone horizontal endereçável
     horizontal_address: entity work.gen_sync(imp)
-            generic map(LOW => H_FRON_PORCH + H_SYNC + H_BACH_PORCH,
+            generic map(LOW_COUNT => H_FRON_PORCH + H_SYNC + H_BACH_PORCH,
                         COUNTER_LENGTH => H_COUNTER_LENGTH)
             port map(clk => clk,
 							rst => rst,
-							c => std_logic_vector(h_counter),
+							c => h_counter,
                      sync => h_addressing);
 
     -- Contagem de pixels endereçáveis 
     h_addr_counter: entity work.gen_counter(imp)
-            generic map(LIMIT => V_ADDRESSABLE,
+            generic map(LIMIT => H_ADDRESSABLE,
                         COUNTER_LENGTH => ADDR_LINE_LENGTH)
             port map(rst => rst,
                      clk => clk,
@@ -98,25 +100,25 @@ begin
 
     -- Gera indicador de sincronia vertical
     vertical_sync: entity work.gen_sync(imp)
-            generic map(LOW =>  V_SYNC, 
+            generic map(LOW_COUNT =>  V_SYNC, 
                         COUNTER_LENGTH => V_COUNTER_LENGTH)
             port map(clk => clk,
 							rst => rst,
-							c => (v_counter),
+							c => v_counter,
                      sync => vsync);
  
     -- Gera indicador de zona vertical endereçável
     vertical_address: entity work.gen_sync(imp)
-            generic map(LOW => V_FRON_PORCH + V_SYNC + V_BACV_PORCH, 
+            generic map(LOW_COUNT => V_FRON_PORCH + V_SYNC + V_BACV_PORCH, 
                         COUNTER_LENGTH => V_COUNTER_LENGTH)
             port map(clk => clk,
 							rst => rst,
-							c => (v_counter),
+							c => v_counter,
                      sync => v_addressing);      
 
     -- Contagem de linhas endereçáveis 
     v_addr_counter: entity work.gen_counter(imp)
-            generic map(LIMIT => H_ADDRESSABLE,
+            generic map(LIMIT => V_ADDRESSABLE,
                         COUNTER_LENGTH => ADDR_COLUMN_LENGTH)
             port map(rst => rst,
                      clk => clk,
