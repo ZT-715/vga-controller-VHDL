@@ -22,15 +22,15 @@ end entity;
 
 architecture imp of gen_counter is
 begin
-    process(clk)
-	  variable count: natural range 0 to LIMIT := 0;
+    process(clk, en)
+		variable count: integer range 0 to LIMIT := 0;
     begin
         if rising_edge(clk) then
-            if rst = '1' then
+            if (rst = '1') then
                 count := 0; 
-            elsif en = '1' then
+            elsif (en = '1') then
                 count := count + 1;
-                if count = LIMIT then
+                if (count = LIMIT) then
                     count := 0;
                 end if;
             end if;
