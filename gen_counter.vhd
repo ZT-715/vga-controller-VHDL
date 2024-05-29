@@ -27,15 +27,17 @@ begin
     begin
         if rising_edge(clk) then
             if (rst = '1') then
-                count := 0; 
-            elsif (en = '1') then
+                count := LIMIT; 
+            else
+              if (en = '1') then
                 count := count + 1;
                 if (count = LIMIT) then
                     count := 0;
                 end if;
+              end if;
             end if;
         end if;
-		    y <= std_logic_vector(to_unsigned(count, COUNTER_LENGTH));
+		  y <= std_logic_vector(to_unsigned(count, COUNTER_LENGTH));
     end process;
 
 end architecture;
