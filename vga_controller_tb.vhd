@@ -19,7 +19,15 @@ architecture tb of vga_controller_tb is
     
 begin
 
-    uut: entity work.vga_controller(imp) port map(rst, clk, hsync, vsync, h_address, v_address, r, g, b);
+    uut: entity work.vga_controller(imp) port map(rst => rst,
+																  clk => clk,
+																  hsync => hsync, 
+																  vsync => vsync, 
+																  h_address => h_address, 
+																  v_address => v_address,
+																  r => r, 
+																  g => g, 
+																  b => b);
 
     clk <= not clk after 10 ns;
     rst <= '0' after 20 ns;
