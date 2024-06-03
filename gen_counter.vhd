@@ -21,24 +21,27 @@ entity gen_counter is
 end entity;
 
 architecture imp of gen_counter is
+signal count: integer range 0 to LIMIT := 0;
 begin
-    process(clk, en)
-		variable count: integer range 0 to LIMIT := 0;
+    process(clk)
     begin
-		if(rst = '1') then
-			count := LIMIT - 1;
-		else
-			if rising_edge(clk) then
-			  if (en = '1') then
-				 count := count + 1;
-					if (count = LIMIT) then
-						count := 0;
-					end if;
-			  end if;
-			end if;
-		end if;
-		y <= std_logic_vector(to_unsigned(count, COUNTER_LENGTH));
+        if rising_edge(clk) then
+            if rst = '1' then
+                count <= 0;
+            else
+                if en = '1' then
+                    if count = LIMIT - 1 then
+                        count <= 0;
+                    else
+                        count <= count + 1;
+                    end if;
+                end if;
+            end if;
+        end if;
     end process;
 
+	 y <= std_logic_vector(to_unsigned(count, COUNTER_LENGTH));
+	 
 end architecture;
+
 

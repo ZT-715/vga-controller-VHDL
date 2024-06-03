@@ -39,8 +39,9 @@ architecture imp of vga_controller is
 
     signal v_enable: std_logic;
     signal v_addressing, h_addressing: std_logic;
+	 signal v_not_addressing, h_not_addressing: std_logic;
 	 
-	 constant H_COUNTER_START: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := (others => '0');
+	 constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE - 1, H_COUNTER_LENGTH));
 
 begin
 
@@ -49,7 +50,10 @@ begin
     b <= (others => '1');
 
     -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
-    v_enable <= '1' when h_counter = H_COUNTER_START else '0';
+    v_enable <= '1' when h_counter = H_COUNTER_END else '0';
+	 
+	 v_addressing <= not v_not_addressing;
+	 h_addressing <= not h_not_addressing;
 
 
     -- Contagem de pixels para lógica de sincronismo horizontal
@@ -74,14 +78,14 @@ begin
 
     -- Gera indicador de zone horizontal endereçável
     horizontal_address: entity work.gen_sync(imp)
-            generic map(HIGH_START_COUNT => 1,
-								LOW_COUNT => H_FRONT_PORCH + H_SYNC + H_BACK_PORCH,
+            generic map(HIGH_START_COUNT => H_FRONT_PORCH + H_SYNC + H_BACK_PORCH,
+								LOW_COUNT => H_ADDRESSABLE,
 								TOTAL_COUNT => H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE,
                         COUNTER_LENGTH => H_COUNTER_LENGTH)
             port map(clk => clk,
 							rst => rst,
 							c => h_counter,
-                     sync => h_addressing);
+                     sync => h_not_addressing);
 
     -- Contagem de pixels endereçáveis 
     h_addr_counter: entity work.gen_counter(imp)
@@ -114,14 +118,14 @@ begin
  
     -- Gera indicador de zona vertical endereçável
     vertical_address: entity work.gen_sync(imp)
-            generic map(HIGH_START_COUNT => 1,
-								LOW_COUNT => V_FRONT_PORCH + V_SYNC + V_BACK_PORCH, 
+            generic map(HIGH_START_COUNT => V_FRONT_PORCH + V_SYNC + V_BACK_PORCH,
+								LOW_COUNT => V_ADDRESSABLE,
 								TOTAL_COUNT => V_FRONT_PORCH + V_SYNC + V_BACK_PORCH + V_ADDRESSABLE,
                         COUNTER_LENGTH => V_COUNTER_LENGTH)
             port map(clk => clk,
 							rst => rst,
 							c => v_counter,
-                     sync => v_addressing);      
+                     sync => v_not_addressing);      
 
     -- Contagem de linhas endereçáveis 
     v_addr_counter: entity work.gen_counter(imp)

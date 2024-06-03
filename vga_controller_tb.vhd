@@ -30,11 +30,15 @@ begin
 																  b => b);
 
     clk <= not clk after 10 ns;
-    rst <= '0' after 20 ns;
 
 	 process
 	 begin
-	 wait for 1040 * 20 ns;
+	  rst <= '0';
+	  wait for 20 ns;
+	  rst <= '1';
+	  wait for 40 ns;
+	  rst <= '0';
+	  wait;
 	 end process;
-	 
+
 end architecture;
