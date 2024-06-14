@@ -19,7 +19,9 @@ entity vga_controller is
         V_COUNTER_LENGTH: natural := 10;
 
         ADDR_LINE_LENGTH: natural := 10;
-        ADDR_COLUMN_LENGTH: natural := 10
+        ADDR_COLUMN_LENGTH: natural := 10;
+
+        RGB_LENGTH: natural := 12
     );
 	 
     port(
@@ -27,8 +29,7 @@ entity vga_controller is
         hsync, vsync: out std_logic;
         h_address: out std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
         v_address: out std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
-		  
-		  v_addressing, h_addressing: out std_logic;
+		    addressing: out std_logic;
 		  
         r, g, b: out std_logic_vector(3 downto 0)
     );
@@ -41,9 +42,11 @@ architecture imp of vga_controller is
     signal v_counter: std_logic_vector(V_COUNTER_LENGTH-1 downto 0);
 
     signal v_enable: std_logic;
-	 signal v_not_addressing, h_not_addressing: std_logic;
+    
+    signal v_addressing, h_addressing: std_logic;
+    signal v_not_addressing, h_not_addressing: std_logic;
 	 
-	 constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE - 1, H_COUNTER_LENGTH));
+    constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE - 1, H_COUNTER_LENGTH));
 
 begin
 
@@ -56,6 +59,18 @@ begin
 	 
 	 v_addressing <= not v_not_addressing;
 	 h_addressing <= not h_not_addressing;
+	 
+	 addressing <= v_addressing and h_addressing;
+
+    pixel_data: entity work.rgb(imp) 
+                generic map(v_bus => ADDR_COLUMN_LENGTH,
+                            h_bus => ADDR_LINE_LENGTH,
+                            data_bus => RGB_LENGTH)
+    
+                port map(en => addressing,
+                        h_address => h_address,
+                        v_address => v_address,
+                        rgb => (r,g,b));
 
 
     -- Contagem de pixels para lógica de sincronismo horizontal

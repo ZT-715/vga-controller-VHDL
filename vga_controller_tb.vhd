@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
--- use ieee.numeric_std.all;
+use ieee.numeric_std.all;
 
 entity vga_controller_tb is
    
@@ -29,7 +29,7 @@ architecture tb of vga_controller_tb is
     signal hsync, vsync: std_logic;
     signal h_address: std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
     signal v_address: std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
-	 signal v_addressing, h_addressing: std_logic;
+	signal addressing: std_logic;
     signal r, g, b: std_logic_vector(3 downto 0);
 	 
 	 signal int_h_address, int_v_address: integer;
@@ -42,14 +42,13 @@ begin
 																  vsync => vsync, 
 																  h_address => h_address, 
 																  v_address => v_address,
-																  h_addressing => h_addressing,
-																  v_addressing => v_addressing,
+																  addressing => addressing,
 																  r => r, 
 																  g => g, 
 																  b => b);
 
-    int_h_address <= integer(to_unsigned(h_address));
-	 int_v_address <= integer(to_unsigned(v_address));
+    int_h_address <= to_integer(unsigned(h_address));
+    int_v_address <= to_integer(unsigned(v_address));
 	 
 	 clk <= not clk after CLOCK_PERIOD/2;
 
@@ -69,14 +68,15 @@ begin
 	 
 	begin
 	  wait until rst = '0';
-	  assert (hsync = '1' and vsync = '1' and h_address = zero_h_address and v_address = zero_v_address and h_addressing = '0' and v_addressing = '0')
+	  assert (hsync = '1' and vsync = '1' and h_address = zero_h_address and
+      v_address = zero_v_address and addressing = '0')
 	  report "Incorrect state after reset."
 	  severity failure;
 	  
 	  wait;
 	end process;
 	 
-	TEST_VERTICAL_SYNC:process
+	TEST_HORIZONTAL_SYNC:process
 	begin
 		wait until rst = '0';
 		loop 
@@ -124,7 +124,7 @@ begin
 	
 	TEST_HORIZONTAL_ADDRESS:process
 	begin
-		wait until h_addressing = '1';
+		wait until addressing = '1';
 		horizontal_test: for n in natural range 0 to H_ADDRESSABLE - 1 loop
 			assert n = int_h_address
 			report "Horizontal Address diverges from expected."
@@ -135,7 +135,7 @@ begin
 	 
 	TEST_VERTICAL_ADDRESS:process
 	begin
-		wait until v_addressing = '1';
+		wait until addressing = '1';
 		vertical_test: for n in natural range 0 to V_ADDRESSABLE - 1 loop
 			assert n = int_v_address
 			report "Vertical Address diverges from expected."
@@ -144,18 +144,6 @@ begin
 		end loop;
 	end process;
 	
-	TEST_HORIZONTAL_ADDRESS:process
-	begin
-		wait until h_addressing = '1';
-		horizontal_test: for n in natural range 0 to H_ADDRESSABLE - 1 loop
-			assert n = int_h_address
-			report "Horizontal Address diverges from expected."
-			severity failure;
-			wait for CLOCK_PERIOD;
-		end loop;
-	end process;
-	 
-
 end architecture;
 
 
