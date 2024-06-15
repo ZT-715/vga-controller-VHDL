@@ -27,11 +27,11 @@ entity vga_controller is
     port(
         rst, clk: in std_logic;
         hsync, vsync: out std_logic;
-        h_address: out std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
-        v_address: out std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
-		    addressing: out std_logic;
+        h_address: buffer std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
+        v_address: buffer std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
+		addressing: buffer std_logic;
 		  
-        r, g, b: out std_logic_vector(3 downto 0)
+        rgb: out std_logic_vector(RGB_LENGTH - 1 downto 0)
     );
 
 end entity;
@@ -45,22 +45,23 @@ architecture imp of vga_controller is
     
     signal v_addressing, h_addressing: std_logic;
     signal v_not_addressing, h_not_addressing: std_logic;
+    
+    -- signal addr: std_logic;
 	 
     constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE - 1, H_COUNTER_LENGTH));
 
 begin
 
-    r <= (others => '1');
-    g <= (others => '1');
-    b <= (others => '1');
-
     -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
     v_enable <= '1' when h_counter = H_COUNTER_END else '0';
 	 
-	 v_addressing <= not v_not_addressing;
-	 h_addressing <= not h_not_addressing;
+	v_addressing <= not v_not_addressing;
+	h_addressing <= not h_not_addressing;
 	 
-	 addressing <= v_addressing and h_addressing;
+	-- addressing <= addr;
+        
+    -- addr <= v_addressing and h_addressing;
+    addressing <= v_addressing and h_addressing;
 
     pixel_data: entity work.rgb(imp) 
                 generic map(v_bus => ADDR_COLUMN_LENGTH,
@@ -70,7 +71,7 @@ begin
                 port map(en => addressing,
                         h_address => h_address,
                         v_address => v_address,
-                        rgb => (r,g,b));
+                        rgb => rgb);
 
 
     -- Contagem de pixels para lógica de sincronismo horizontal
