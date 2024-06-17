@@ -16,12 +16,12 @@ architecture imp of dflipflop is
 
 begin
 
-process(clk)
+process(clk, rst)
 begin
-	if rising_edge(clk) then 
-      q <= d;
-	elsif rst = '1' then
+    if rst = '1' then
 		q <= '1';
+	elsif rising_edge(clk) then 
+      q <= d;
    end if;
 end process;
 
