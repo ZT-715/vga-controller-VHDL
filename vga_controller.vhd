@@ -25,7 +25,7 @@ entity vga_controller is
     );
 	 
     port(
-        rst, clk: in std_logic;
+        sel, rst, clk: in std_logic;
         hsync, vsync: out std_logic;
         h_address: buffer std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
         v_address: buffer std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
@@ -48,7 +48,7 @@ architecture imp of vga_controller is
     
     -- signal addr: std_logic;
 	 
-    constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE - 1, H_COUNTER_LENGTH));
+    constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH - 1, H_COUNTER_LENGTH));
 
 begin
 
@@ -68,7 +68,9 @@ begin
                             h_bus => ADDR_LINE_LENGTH,
                             data_bus => RGB_LENGTH)
     
-                port map(en => addressing,
+                port map(sel => sel,
+                        en => addressing,
+                        clk => clk,
                         h_address => h_address,
                         v_address => v_address,
                         rgb => rgb);
@@ -90,8 +92,8 @@ begin
 								TOTAL_COUNT => H_FRONT_PORCH + H_SYNC + H_BACK_PORCH + H_ADDRESSABLE,
                         COUNTER_LENGTH => H_COUNTER_LENGTH)
             port map(clk => clk,
-							rst => rst,
-							c => h_counter,
+                     rst => rst,
+                     c => h_counter,
                      sync => hsync);
 
     -- Gera indicador de zone horizontal endereçável
@@ -121,12 +123,12 @@ begin
             port map(rst => rst,
                      clk => clk,
                      en => v_enable,
-                     y => (v_counter));
+                     y => v_counter);
 
     -- Gera indicador de sincronia vertical
     vertical_sync: entity work.gen_sync(imp)
             generic map(HIGH_START_COUNT => V_FRONT_PORCH,
-								LOW_COUNT =>  V_SYNC,
+								LOW_COUNT => V_SYNC,
 								TOTAL_COUNT => V_FRONT_PORCH + V_SYNC + V_BACK_PORCH + V_ADDRESSABLE,
                         COUNTER_LENGTH => V_COUNTER_LENGTH)
             port map(clk => clk,
