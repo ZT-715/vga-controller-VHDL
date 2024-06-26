@@ -45,22 +45,23 @@ architecture imp of vga_controller is
     
     signal v_addressing, h_addressing: std_logic;
     signal v_not_addressing, h_not_addressing: std_logic;
-    
-    -- signal addr: std_logic;
-	 
-    constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) := std_logic_vector(to_unsigned(H_FRONT_PORCH - 1, H_COUNTER_LENGTH));
+	
+    signal v_addressing_enable: std_logic;
+
+    -- Subtracts 2, one for starting at 0, second for delay between enable to
+    -- clock edge
+    constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) :=
+    std_logic_vector(to_unsigned(H_FRONT_PORCH - 2, H_COUNTER_LENGTH));
 
 begin
 
     -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
     v_enable <= '1' when h_counter = H_COUNTER_END else '0';
-	 
+	v_addressing_enable <= v_enable and v_addressing;
+
 	v_addressing <= not v_not_addressing;
 	h_addressing <= not h_not_addressing;
 	 
-	-- addressing <= addr;
-        
-    -- addr <= v_addressing and h_addressing;
     addressing <= v_addressing and h_addressing;
 
     pixel_data: entity work.rgb(imp) 
@@ -153,7 +154,7 @@ begin
                         COUNTER_LENGTH => ADDR_COLUMN_LENGTH)
             port map(rst => rst,
                      clk => clk,
-                     en => v_addressing,
+                     en => v_addressing_enable,
                      y => v_address);
 
 end architecture;
