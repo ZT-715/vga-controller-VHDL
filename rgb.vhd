@@ -42,22 +42,12 @@ begin
 int_h_address <= to_integer(unsigned(h_address));
 int_v_address <= to_integer(unsigned(v_address));
 
+
 rgb_out <= rgb_out_h when sel = '0' else rgb_out_v;
 
+rgb <= BLACK when en = '0' else rgb_out;
 
-process(en, clk, rgb_out)
-    begin
-        if rising_edge(clk) then
-            if en = '1' then
-                rgb <= rgb_out;
-            else
-                rgb <= BLACK;
-            end if;
-        end if;
-    end process;
-
-    
-   process (clk, int_v_address)
+process (clk, int_v_address)
    begin
         if rising_edge(clk) then
             if int_v_address = 0 then
@@ -83,7 +73,7 @@ process(en, clk, rgb_out)
     end process;
     
     
-       process (clk, int_h_address)
+process (clk, int_h_address)
    begin
         if rising_edge(clk) then 
             if (int_h_address = 0) or (int_h_address = 800 - 1) then
