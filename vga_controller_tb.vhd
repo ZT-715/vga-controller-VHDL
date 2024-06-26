@@ -55,18 +55,19 @@ begin
 
 	 RESET:process
 	 begin
-		rst <= '0';
-		wait for CLOCK_PERIOD;
+
 		rst <= '1';
 		wait for CLOCK_PERIOD*2;
 		rst <= '0';
+        
+        report "End rst state.";
+
 		wait;
 	 end process;
 
 	TEST_INITIAL_STATE:process	 
 	begin
 
-      wait until rst = '1';
       wait until rst = '0';
 	  
       assert (hsync = '1' and vsync = '1' and int_h_address = 0 and
@@ -80,18 +81,25 @@ begin
 	 
 	TEST_HORIZONTAL_SYNC_AND_ADDRESS:process
 	begin
-      wait until rst = '1';
-      wait until rst = '0';  
+        wait until rst = '0';  
     
-		wait until int_h_address = 799;
-        wait for CLOCK_PERIOD;
-      
-        report "Start TEST_VERTICAL_SYNC_AND_ADDRESS.";
+        wait until int_h_address = 799;
+        report "End first row."
+        severity note;
+
+        -- Garantees ModelSim evaluates signal on clk edge
+        -- and not before
+        wait until clk = '1'; 
+        wait for CLOCK_PERIOD/2;
+
+        report "Start TEST_VERTICAL_SYNC_AND_ADDRESS."
+        severity note;
 
         
         h_sync_test: for n in natural range 0 to 3 loop
             
-            report "TEST_HORIZONTAL_SYNC_AND_ADDRESS: " & natural'image(n);
+            report "TEST_HORIZONTAL_SYNC_AND_ADDRESS: " & natural'image(n)
+            severity note;
         
             assert int_h_address = 0
             report "h_address incorrect end."
@@ -107,7 +115,7 @@ begin
 			report "Hsync high on sync pulse."
 			severity failure;
 			
-			wait for V_SYNC*CLOCK_PERIOD;
+			wait for H_SYNC*CLOCK_PERIOD;
             
 			assert hsync = '1'
 			report "Sync pulse larger than expected."
@@ -130,20 +138,30 @@ begin
             report "End TEST_HORIZONTAL_SYNC_AND_ADDRESS " & natural'image(n);
             
 		end loop;
+        wait;
 	end process;
 	
 	TEST_VERTICAL_SYNC_AND_ADDRESS:process
 	begin
-          wait until rst = '1';
-          wait until rst = '0';      
-		wait until int_v_address = 599;
-        wait for CLOCK_PERIOD;
+        wait until rst = '0';      
+		
+        wait until int_v_address = 599;
+        report "End frame."
+        severity note;
 
-        report "Start TEST_VERTICAL_SYNC_AND_ADDRESS.";
+        wait for CLOCK_PERIOD*H_PERIOD;
+
+        -- Garantees ModelSim evaluates signal on clk edge
+        -- and not before
+        wait for CLOCK_PERIOD/2;
+
+        report "Start TEST_VERTICAL_SYNC_AND_ADDRESS."
+        severity note;
         
 		v_sync_test: for n in natural range 0 to 3 loop
         
-            report "TEST_VERTICAL_SYNC_AND_ADDRESS: " & natural'image(n);
+            report "TEST_VERTICAL_SYNC_AND_ADDRESS: " & natural'image(n)
+            severity note;
 
         
             assert int_v_address = 0;
@@ -184,41 +202,57 @@ begin
             
         end loop;
 
+        wait;
 	end process;
 	
 	TEST_HORIZONTAL_ADDRESS:process
 	begin
 		wait until addressing = '1';
+        report "Start horizontal address test.";
+        wait for CLOCK_PERIOD/2;
+
 		horizontal_test: for n in natural range 0 to H_ADDRESSABLE - 1 loop
 			assert n = int_h_address
-			report "Horizontal Address diverges from expected," &
-                    integer'image(int_v_address) &
-                    " vs. " & natural'image(n)
+			report "Horizontal address " & 
+                    integer'image(int_h_address) &
+                    " diverges from expected " &
+                    natural'image(n)
 			severity failure;
 			wait for CLOCK_PERIOD;
 		end loop;
+
+        report "End horizontal address test.";
+        wait;
 	end process; 
 	 
 	TEST_VERTICAL_ADDRESS:process
 	begin
 		wait until addressing = '1';
+        report "Start vertical address test.";
+        wait for CLOCK_PERIOD/2;
+
 		vertical_test: for n in natural range 0 to V_ADDRESSABLE - 1 loop
 			assert n = int_v_address
-			report "Vertical address diverges from expected," &
+            report "Vertical address " & 
                     integer'image(int_v_address) &
-                    " vs. " & natural'image(n)
+                    " diverges from expected " &
+                    natural'image(n)
 			severity failure;
 			wait for H_PERIOD*CLOCK_PERIOD;
 		end loop;
+
+        report "End vertical address test.";
+        wait;
 	end process;
 	
     TEST_DEAD_ZONE: process
     begin
     
-      wait until rst = '1';
-      wait until rst = '0';        
+      wait until rst = '0';
+      wait for CLOCK_PERIOD/2;
       
       loop
+      
       if addressing = '0' then
             
             assert rgb = BLACK
@@ -228,13 +262,9 @@ begin
             wait for CLOCK_PERIOD;
         else
             wait until addressing = '0';
+            wait for CLOCK_PERIOD/2;
         end if;
       end loop;
     end process;       
         
 end architecture;
-
-
-
-
-
