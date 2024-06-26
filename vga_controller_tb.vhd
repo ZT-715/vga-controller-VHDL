@@ -21,6 +21,8 @@ entity vga_controller_tb is
   constant V_BACK_PORCH: natural := 23;
   constant V_PERIOD: natural := V_BACK_PORCH + V_SYNC + V_FRONT_PORCH + V_ADDRESSABLE;
   
+  constant BLACK: std_logic_vector(11 downto 0) := (others => '0');
+
 end entity;
 
 architecture tb of vga_controller_tb is
@@ -30,22 +32,21 @@ architecture tb of vga_controller_tb is
     signal h_address: std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
     signal v_address: std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
 	signal addressing: std_logic;
-    signal r, g, b: std_logic_vector(3 downto 0);
+    signal rgb: std_logic_vector(11 downto 0);
 	 
-	 signal int_h_address, int_v_address: integer;
+	 signal int_h_address, int_v_address: integer range 0 to 999;
     
 begin
 
-    uut: entity work.vga_controller(imp) port map(rst => rst,
-																  clk => clk,
-																  hsync => hsync, 
-																  vsync => vsync, 
-																  h_address => h_address, 
-																  v_address => v_address,
-																  addressing => addressing,
-																  r => r, 
-																  g => g, 
-																  b => b);
+    uut: entity work.vga_controller(imp) port map(sel => '0', 
+                                                  rst => rst,
+                                                  clk => clk,
+                                                  hsync => hsync, 
+                                                  vsync => vsync, 
+                                                  h_address => h_address, 
+                                                  v_address => v_address,
+                                                  addressing => addressing,
+                                                  rgb => rgb);
 
     int_h_address <= to_integer(unsigned(h_address));
     int_v_address <= to_integer(unsigned(v_address));
@@ -62,24 +63,40 @@ begin
 		wait;
 	 end process;
 
-	TEST_INITIAL_STATE:process
-		constant zero_h_address: std_logic_vector(ADDR_LINE_LENGTH-1 downto 0) := (others => '0');
-		constant zero_v_address: std_logic_vector(ADDR_LINE_LENGTH-1 downto 0) := (others => '0');
-	 
+	TEST_INITIAL_STATE:process	 
 	begin
-	  wait until rst = '0';
-	  assert (hsync = '1' and vsync = '1' and h_address = zero_h_address and
-      v_address = zero_v_address and addressing = '0')
+
+      wait until rst = '1';
+      wait until rst = '0';
+	  
+      assert (hsync = '1' and vsync = '1' and int_h_address = 0 and
+      int_v_address = 0 and addressing = '0')
 	  report "Incorrect state after reset."
 	  severity failure;
 	  
 	  wait;
+      
 	end process;
 	 
-	TEST_HORIZONTAL_SYNC:process
+	TEST_HORIZONTAL_SYNC_AND_ADDRESS:process
 	begin
-		wait until rst = '0';
-		loop 
+      wait until rst = '1';
+      wait until rst = '0';  
+    
+		wait until int_h_address = 799;
+        wait for CLOCK_PERIOD;
+      
+        report "Start TEST_VERTICAL_SYNC_AND_ADDRESS.";
+
+        
+        h_sync_test: for n in natural range 0 to 3 loop
+            
+            report "TEST_HORIZONTAL_SYNC_AND_ADDRESS: " & natural'image(n);
+        
+            assert int_h_address = 0
+            report "h_address incorrect end."
+            severity failure;
+        
 			assert hsync = '1'
 			report "Hsync low on start of horizontal period."
 			severity failure;
@@ -87,39 +104,86 @@ begin
 			wait for H_FRONT_PORCH*CLOCK_PERIOD;
 			
 			assert hsync = '0'
-			report "Hsync high on high on sync pulse."
+			report "Hsync high on sync pulse."
 			severity failure;
 			
 			wait for V_SYNC*CLOCK_PERIOD;
+            
 			assert hsync = '1'
 			report "Sync pulse larger than expected."
 			severity failure;
-			
-			wait for (H_PERIOD - H_FRONT_PORCH - V_SYNC)*CLOCK_PERIOD;
+            
+            wait for H_BACK_PORCH*CLOCK_PERIOD;
+            
+			assert int_h_address = 0
+			report "Wrong h_address at horizontal address start."
+			severity failure;
+            
+            wait for (H_ADDRESSABLE - 1)*CLOCK_PERIOD;
+            
+			assert int_h_address = 799
+			report "Wrong h_address at horizontal address end."
+			severity failure;
+            
+            wait for CLOCK_PERIOD;
+            
+            report "End TEST_HORIZONTAL_SYNC_AND_ADDRESS " & natural'image(n);
+            
 		end loop;
 	end process;
 	
-	TEST_VERTICAL_SYNC:process
+	TEST_VERTICAL_SYNC_AND_ADDRESS:process
 	begin
-		wait until rst = '0';
-		loop
+          wait until rst = '1';
+          wait until rst = '0';      
+		wait until int_v_address = 599;
+        wait for CLOCK_PERIOD;
+
+        report "Start TEST_VERTICAL_SYNC_AND_ADDRESS.";
+        
+		v_sync_test: for n in natural range 0 to 3 loop
+        
+            report "TEST_VERTICAL_SYNC_AND_ADDRESS: " & natural'image(n);
+
+        
+            assert int_v_address = 0;
+            report "v_address incorrect end."
+            severity failure;
+        
 			assert vsync = '1'
-			report "Vsync low on start of horizontal period."
+			report "vsync low on start of vertical period."
 			severity failure;
 			
 			wait for V_FRONT_PORCH*CLOCK_PERIOD;
 			
-			assert vsync = '0';
-			report "Vsync high on high on sync pulse."
+			assert vsync = '0'
+			report "Hsync high on sync pulse."
 			severity failure;
 			
 			wait for V_SYNC*CLOCK_PERIOD;
+            
 			assert vsync = '1'
-			report "Vsync pulse larger than expected."
+			report "Sync pulse larger than expected."
 			severity failure;
-			
-			wait for (V_PERIOD - V_FRONT_PORCH - V_SYNC)*CLOCK_PERIOD;
-		end loop;
+            
+            wait for V_BACK_PORCH*CLOCK_PERIOD;
+            
+			assert int_v_address = 0
+			report "Wrong v_address at vertical address start."
+			severity failure;
+            
+            wait for (V_ADDRESSABLE - 1)*CLOCK_PERIOD;
+            
+			assert int_v_address = 599
+			report "Wrong v_address at vertical address end."
+			severity failure;
+            
+            wait for CLOCK_PERIOD;
+            
+            report "End TEST_VERTICAL_SYNC_AND_ADDRESS " & natural'image(n);
+            
+        end loop;
+
 	end process;
 	
 	TEST_HORIZONTAL_ADDRESS:process
@@ -127,7 +191,9 @@ begin
 		wait until addressing = '1';
 		horizontal_test: for n in natural range 0 to H_ADDRESSABLE - 1 loop
 			assert n = int_h_address
-			report "Horizontal Address diverges from expected."
+			report "Horizontal Address diverges from expected," &
+                    integer'image(int_v_address) &
+                    " vs. " & natural'image(n)
 			severity failure;
 			wait for CLOCK_PERIOD;
 		end loop;
@@ -138,12 +204,34 @@ begin
 		wait until addressing = '1';
 		vertical_test: for n in natural range 0 to V_ADDRESSABLE - 1 loop
 			assert n = int_v_address
-			report "Vertical Address diverges from expected."
+			report "Vertical address diverges from expected," &
+                    integer'image(int_v_address) &
+                    " vs. " & natural'image(n)
 			severity failure;
 			wait for H_PERIOD*CLOCK_PERIOD;
 		end loop;
 	end process;
 	
+    TEST_DEAD_ZONE: process
+    begin
+    
+      wait until rst = '1';
+      wait until rst = '0';        
+      
+      loop
+      if addressing = '0' then
+            
+            assert rgb = BLACK
+            report "Colors in dead zone"
+            severity failure;
+            
+            wait for CLOCK_PERIOD;
+        else
+            wait until addressing = '0';
+        end if;
+      end loop;
+    end process;       
+        
 end architecture;
 
 
