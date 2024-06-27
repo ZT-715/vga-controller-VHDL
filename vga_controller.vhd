@@ -37,19 +37,26 @@ entity vga_controller is
 end entity;
 
 architecture imp of vga_controller is
-    
+    -- Conta pixels     
     signal h_counter: std_logic_vector(H_COUNTER_LENGTH-1 downto 0); 
+    -- Conta rows
     signal v_counter: std_logic_vector(V_COUNTER_LENGTH-1 downto 0);
 
+    -- Enable do v_counter
     signal v_enable: std_logic;
     
+    -- Flags de zona ativa
     signal v_addressing, h_addressing: std_logic;
     signal v_not_addressing, h_not_addressing: std_logic;
 	
+    -- Enable de contador de endereço vertical
     signal v_addressing_enable: std_logic;
 
-    -- Subtracts 2, one for starting at 0, second for delay between enable to
-    -- clock edge
+    
+    -- Ponto do contador horizontal em que o contador vertical é ativo
+    -- utiliza H_FRONT_PORCH - 2 para descontar tanto o início em 0 
+    -- quanto o delay entre enable e contagem, para que a contagem ocorra
+    -- junto ao vsync
     constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) :=
     std_logic_vector(to_unsigned(H_FRONT_PORCH - 2, H_COUNTER_LENGTH));
 
@@ -57,7 +64,8 @@ begin
 
     -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
     v_enable <= '1' when h_counter = H_COUNTER_END else '0';
-	v_addressing_enable <= v_enable and v_addressing;
+	
+    v_addressing_enable <= v_enable and v_addressing;
 
 	v_addressing <= not v_not_addressing;
 	h_addressing <= not h_not_addressing;
