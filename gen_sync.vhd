@@ -30,23 +30,21 @@ begin
 	report "HIGH_START_COUNT must be 1 or greater"
 	severity failure;
 	
---  	 dff: entity work.dflipflop(imp) 
---  			port map(clk => clk,
---  						rst => rst,
---  						d => d,
---  						q => q);
+  	 dff: entity work.dflipflop(imp) 
+  			port map(clk => clk,
+  						rst => rst,
+  						d => d,
+  						q => q);
 
     count <= to_integer(unsigned(c));
 
     with count select
         d <=
-            '1' when 0,
-            '1' when TOTAL_COUNT - 1,
             '0' when HIGH_START_COUNT - 1,
             '1' when HIGH_START_COUNT + LOW_COUNT - 1,
-            unaffected when others;    
+            q when others;    
 	 	 
-   sync <= d;
+   sync <= q;
 
 end architecture;
 --    
