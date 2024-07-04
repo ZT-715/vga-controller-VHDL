@@ -67,7 +67,6 @@ begin
                       h_address => h_address, 
                       v_address => v_address,
                       addressing => addressing,
-							 rgb_in => (others => '1'),
                       rgb => rgb);
                 
     int_h_address <= to_integer(unsigned(h_address));

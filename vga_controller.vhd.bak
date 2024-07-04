@@ -25,16 +25,13 @@ entity vga_controller is
     );
 	 
     port(
-        rst, clk	: in std_logic;
-		  
+        sel, rst, clk: in std_logic;
         hsync, vsync: out std_logic;
-        addressing: buffer std_logic;
+        h_address: buffer std_logic_vector(ADDR_LINE_LENGTH-1 downto 0);
+        v_address: buffer std_logic_vector(ADDR_COLUMN_LENGTH-1 downto 0);
+		addressing: buffer std_logic;
 		  
-		  h_address	: buffer std_logic_vector(ADDR_LINE_LENGTH - 1 downto 0);
-        v_address	: buffer std_logic_vector(ADDR_COLUMN_LENGTH - 1 downto 0);
-		  
-		  rgb_in		: in std_logic_vector(RGB_LENGTH - 1 downto 0);
-        rgb			: out std_logic_vector(RGB_LENGTH - 1 downto 0)
+        rgb: out std_logic_vector(RGB_LENGTH - 1 downto 0)
     );
 
 end entity;
