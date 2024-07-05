@@ -53,7 +53,11 @@ begin
     IMAGE: process(clk, int_h_address, int_v_address)
     begin
         if rising_edge(clk) then
-            -- Fundo
+            
+				-- TODO
+				-- Adicionar degrade RGB do endereço 0 ao 1850 pare exibir blocos
+				
+				-- Fundo			
             rgb_value <= WHITE;
 
             -- LINHAS PRETAS

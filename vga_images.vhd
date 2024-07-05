@@ -64,9 +64,9 @@ begin
 	int_v_address <= to_integer(unsigned(v_address));
 		 
    rgb <= rgb_out_h when sel = "00",
-	   rgb_out_v when sel = "01",
-	   RED when sel = "11",
-	   else rgb_rom;
+			 rgb_out_v when sel = "01",
+			 RED when sel = "11",
+			 else rgb_rom;
 			
 	vga: entity vga_controller(imp) port map(
         rst, clk	: in std_logic;
