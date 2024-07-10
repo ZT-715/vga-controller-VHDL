@@ -18,15 +18,15 @@ entity rom is
     );
 begin
 
-    assert H_BUS > 0 and V_BUS > 0 and VALUE_LENGHT > 0
+    assert H_BUS > 0 and V_BUS > 0 and VALUE_LENGTH > 0
     report "All SLVs must be of size 1 or greater."
     severity failure;
 
-    assert 2**V_BUS - 1 >= V_ADDRESS_MAX
+    assert 2**V_BUS - 1 >= V_ADDRESS_END
     report "V_ADDRESS_MAX rgb_value is less than the V_BUS allows."
     severity failure;
     
-    assert 2**H_BUS - 1 >= H_ADDRESS_MAX
+    assert 2**H_BUS - 1 >= H_ADDRESS_END
     report "H_ADDRESS_MAX rgb_value is less than the H_BUS allows."
     severity failure;
 
