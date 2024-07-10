@@ -26,20 +26,28 @@ entity vga_controller is
 	 
     port(
         rst, clk	: in std_logic;
+		  rgb_test_en	: in std_logic;
 		  
-        hsync, vsync: out std_logic;
-        addressing: buffer std_logic;
+        hsync, vsync  : out std_logic;
+        addressing_out: buffer std_logic;
 		  
-		  h_address	: buffer std_logic_vector(ADDR_LINE_LENGTH - 1 downto 0);
-        v_address	: buffer std_logic_vector(ADDR_COLUMN_LENGTH - 1 downto 0);
+		  h_address_out : buffer std_logic_vector(ADDR_LINE_LENGTH - 1 downto 0);
+        v_address_out : buffer std_logic_vector(ADDR_COLUMN_LENGTH - 1 downto 0);
 		  
-		  rgb_in		: in std_logic_vector(RGB_LENGTH - 1 downto 0);
-        rgb			: out std_logic_vector(RGB_LENGTH - 1 downto 0)
+		  rgb_in			 : in std_logic_vector(RGB_LENGTH - 1 downto 0);
+        rgb				 : out std_logic_vector(RGB_LENGTH - 1 downto 0)
     );
+	 
+	 begin
+	 
+	--	 ToDo:
+	--	 Adicionar asserts para valores genéricos utilizados, com comentários do escopo 
+	--	 de alterações viáveis ao componente.
 
 end entity;
 
 architecture imp of vga_controller is
+	
     -- Conta pixels     
     signal h_counter: std_logic_vector(H_COUNTER_LENGTH-1 downto 0); 
     -- Conta rows
@@ -54,38 +62,56 @@ architecture imp of vga_controller is
 	
     -- Enable de contador de endereço vertical
     signal v_addressing_enable: std_logic;
+	 
+	 -- Buffer de saída do indicador de zona ativa
+	 signal addressing: std_logic; 
+	 
+	 -- Buffer de saída dos endereços horizontal e vertical
+	 signal h_address : std_logic_vector(ADDR_LINE_LENGTH - 1 downto 0);
+	 signal v_address : std_logic_vector(ADDR_COLUMN_LENGTH - 1 downto 0);
 
     
-    -- Ponto do contador horizontal em que o contador vertical é ativo
+    -- Ponto do contador horizontal em que o contador vertical é ativo,
     -- utiliza H_FRONT_PORCH - 2 para descontar tanto o início em 0 
-    -- quanto o delay entre enable e contagem, para que a contagem ocorra
-    -- junto ao vsync
+    -- quanto o delay entre enable e contagem, assim, a contagem ocorre
+    -- junto ao inicio do pulso de hsync
     constant H_COUNTER_END: std_logic_vector(H_COUNTER_LENGTH - 1 downto 0) :=
     std_logic_vector(to_unsigned(H_FRONT_PORCH - 2, H_COUNTER_LENGTH));
 
 begin
 
-    -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
+	 -- Conexão de sinais de buffer da saída
+    addressing_out <= addressing;
+    h_address_out  <= h_address;
+    v_address_out  <= v_address;
+	 
+	 -- Indicador de zona ativa
+    addressing <= v_addressing and h_addressing;
+	 
+ 	 v_addressing <= not v_not_addressing;
+	 h_addressing <= not h_not_addressing;
+
+	 -- Enable contagem vertical por 1 pixel a cada ciclo da contagem horizontal
     v_enable <= '1' when h_counter = H_COUNTER_END else '0';
 	
-    v_addressing_enable <= v_enable and v_addressing;
-
-	v_addressing <= not v_not_addressing;
-	h_addressing <= not h_not_addressing;
+	 -- Enable para contador de endereço vertical
+	 v_addressing_enable <= v_enable and v_addressing;
 	 
-    addressing <= v_addressing and h_addressing;
-
+	 -- Controlador de saída RGB
     pixel_data: entity work.rgb(imp) 
                 generic map(v_bus => ADDR_COLUMN_LENGTH,
                             h_bus => ADDR_LINE_LENGTH,
                             data_bus => RGB_LENGTH)
     
-                port map(sel => sel,
-                        en => addressing,
-                        clk => clk,
-                        h_address => h_address,
-                        v_address => v_address,
-                        rgb => rgb);
+                port map(clk => clk,
+								 test_en => rgb_test_en,
+					          en => addressing,
+                         
+                         h_address => h_address,
+                         v_address => v_address,
+								 
+								 rgb_in => rgb_in,
+                         rgb => rgb);
 
 
     -- Contagem de pixels para lógica de sincronismo horizontal

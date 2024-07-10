@@ -59,14 +59,14 @@ begin
                      V_SYNC => V_SYNC,
                      V_BACK_PORCH => V_BACK_PORCH)
 
-               port map(sel => '0', 
-                      rst => rst,
+               port map(rst => rst,
                       clk => clk,
+							 rgb_test_en => '1',
                       hsync => hsync, 
                       vsync => vsync, 
-                      h_address => h_address, 
-                      v_address => v_address,
-                      addressing => addressing,
+                      h_address_out => h_address, 
+                      v_address_out => v_address,
+                      addressing_out => addressing,
 							 rgb_in => (others => '1'),
                       rgb => rgb);
                 
