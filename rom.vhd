@@ -4,8 +4,8 @@ use ieee.numeric_std.all;
 
 entity rom is
     generic(
-        H_BUS : natural := 6;
-        V_BUS : natural := 4;
+        H_BUS : natural := 7;
+        V_BUS : natural := 6;
         VALUE_LENGTH : natural := 12;
         H_ADDRESS_END : natural := 50;
         V_ADDRESS_END : natural := 37
@@ -53,9 +53,13 @@ begin
     IMAGE: process(clk, int_h_address, int_v_address)
     begin
         if rising_edge(clk) then
-            -- Fundo
+            
+				-- TODO
+				-- Adicionar degrade RGB do endereço 0 ao 1850 pare exibir blocos
+				
+				-- Fundo			
             rgb_value <= WHITE;
-
+            
             -- LINHAS PRETAS
             -- Linha 1
             if (int_v_address = 0 + V_SHIFT) and (int_h_address >= 5 + H_SHIFT) and (int_h_address <= 12 + H_SHIFT) then
@@ -127,6 +131,10 @@ begin
 
         -- FIM DETALHES MARROM CLARO
 
+            end if;
+        -- Bordas
+            if int_h_address = 38 then
+                rgb_value <= BLACK;
             end if;
         end if;
     end process;
