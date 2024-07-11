@@ -46,35 +46,36 @@ architecture tb of vga_controller_tb is
 	 signal int_h_address, int_v_address: integer range 0 to 999;
     
 begin
-
     uut: entity work.vga_controller(imp)
-             generic map(
-                     H_ADDRESSABLE => H_ADDRESSABLE,
-                     H_FRONT_PORCH =>H_FRONT_PORCH,
-                     H_SYNC => H_SYNC,
-                     H_BACK_PORCH => H_BACK_PORCH,
+        generic map(
+                    H_ADDRESSABLE => H_ADDRESSABLE,
+                    H_FRONT_PORCH =>H_FRONT_PORCH,
+                    H_SYNC => H_SYNC,
+                    H_BACK_PORCH => H_BACK_PORCH,
+                    
+                    V_ADDRESSABLE => V_ADDRESSABLE,
+                    V_FRONT_PORCH => V_FRONT_PORCH,
+                    V_SYNC => V_SYNC,
+                    V_BACK_PORCH => V_BACK_PORCH)
 
-                     V_ADDRESSABLE => V_ADDRESSABLE,
-                     V_FRONT_PORCH => V_FRONT_PORCH,
-                     V_SYNC => V_SYNC,
-                     V_BACK_PORCH => V_BACK_PORCH)
+        port map(
+                rst => rst,
+                clk => clk,
+                rgb_test_en => '1',
+                hsync => hsync, 
+                vsync => vsync, 
+                h_address_out => h_address, 
+                v_address_out => v_address,
+                addressing_out => addressing,
+                rgb_in => (others => '1'),
+                rgb => rgb);
 
-               port map(rst => rst,
-                      clk => clk,
-							 rgb_test_en => '1',
-                      hsync => hsync, 
-                      vsync => vsync, 
-                      h_address_out => h_address, 
-                      v_address_out => v_address,
-                      addressing_out => addressing,
-							 rgb_in => (others => '1'),
-                      rgb => rgb);
-                
-    int_h_address <= to_integer(unsigned(h_address));
-    int_v_address <= to_integer(unsigned(v_address));
-	 
-	 clk <= not clk after CLOCK_PERIOD/2;
+     int_h_address <= to_integer(unsigned(h_address));
+     int_v_address <= to_integer(unsigned(v_address));
+	
+     clk <= not clk after CLOCK_PERIOD/2;
 
+    
 	 RESET:process
 	 begin
 
@@ -174,14 +175,17 @@ begin
         -- Garantees ModelSim evaluates signal on clk edge
         -- and not before
         wait for CLOCK_PERIOD/2;
+        
+        -- Concidera defasagem de 1 clock entre os contadores
+        -- e os sinais.
+        wait for CLOCK_PERIOD;
 
-
-
+        -- Checa se continuamos no momento correto
         assert int_v_address = V_ADDRESSABLE - 1       
-        report "Simulator ERROR."
+        report "Simulation ERROR."
         severity failure;
 
-
+        -- passa para primaira linha do próximo frame
         wait for CLOCK_PERIOD*H_PERIOD;
 
         report "Start TEST_VERTICAL_SYNC_AND_ADDRESS."
@@ -191,11 +195,9 @@ begin
         
             report "TEST_VERTICAL_SYNC_AND_ADDRESS: " & natural'image(n)
             severity note;
-
-        
-            wait for 1 ns;
+            
             assert v_address = "0000000000"
-            report "v_address incorrect end."
+            report "v_address incorrect start."
             severity failure;
         
 			assert vsync = '1'
