@@ -9,7 +9,8 @@ entity rgb is
         DATA_BUS   : integer := 12 
     );
     port (
-        clk, test_en, en   : in  std_logic;        
+        clk, en   : in  std_logic;        
+        test_en   : in  std_logic;        
         
         rgb_in    : in std_logic_vector(DATA_BUS - 1 downto 0);
         
@@ -22,13 +23,16 @@ entity rgb is
 end entity rgb;
 
 architecture imp of rgb is
-	 signal rgb_test: std_logic_vector(DATA_BUS - 1 downto 0);
-	 signal rgb_out: std_logic_vector(DATA_BUS - 1 downto 0);
+    signal rgb_test: std_logic_vector(DATA_BUS - 1 downto 0);
 
-	 signal int_h_address: natural range 0 to H_BUS;
+    signal rgb_test_v_bar: std_logic_vector(DATA_BUS - 1 downto 0);
+    signal rgb_test_h_bar: std_logic_vector(DATA_BUS - 1 downto 0);
+    signal rgb_out: std_logic_vector(DATA_BUS - 1 downto 0);
+
+    signal int_h_address: natural range 0 to H_BUS;
     signal int_v_address: natural range 0 to V_BUS;
-    
-	 constant COLOR_LENGTH: natural := DATA_BUS/3;
+
+    constant COLOR_LENGTH: natural := DATA_BUS/3;
 
     constant RED:    std_logic_vector(DATA_BUS - 1 downto 0) := (DATA_BUS - 1 downto COLOR_LENGTH*2 => '1', others => '0'); 
     constant GREEN:  std_logic_vector(DATA_BUS - 1 downto 0) := (COLOR_LENGTH*2 - 1 downto COLOR_LENGTH => '1', others => '0');
@@ -43,54 +47,83 @@ begin
     int_h_address <= to_integer(unsigned(h_address));
     int_v_address <= to_integer(unsigned(v_address));
 
-	 rgb <= rgb_out when en = '1' else BLACK;
+    -- Gerador de dead zone
+    rgb <= rgb_out when en = '1' else BLACK;
 	 
-	 rgb_out <= rgb_test when test_en = '1' else rgb_in;
+    -- Seleciona entre: 
+    -- saída com teste com barras coloridas
+    -- vs. 
+    -- saída de imagem recebida.
+    rgb_out <= rgb_test when test_en = '1' else rgb_in;
 
-	process (clk, int_v_address, int_h_address)
-   begin
+    
+    -- Gera imagem de saída composta de 2 fontes, 
+    -- barras versticais até o endereço vertical 449
+    -- barras horizontais posteriormente.
+    TEST_IMAGE_OUT:process (clk, int_v_address, int_h_address)
+    begin
         if rising_edge(clk) then
-			  if int_v_address > 450 then
-					if int_v_address = 0 then
-						 rgb_test <= RED;
-					elsif int_v_address = 74 then
-						 rgb_test <= GREEN;
-					elsif int_v_address = 149 then
-						 rgb_test <= BLUE;
-					elsif int_v_address = 224 then
-						 rgb_test <= BLACK;
-					elsif int_v_address = 299 then
-						 rgb_test <= WHITE;
-					elsif int_v_address = 374 then
-						 rgb_test <= CYAN;
-					elsif int_v_address = 449 then
-						 rgb_test <= MAGENTA;
-					elsif int_v_address = 524 then
-						 rgb_test <= YELLOW;
-					else
-						 rgb_test <= rgb_test; 
-					end if;
-				else
-					if  (int_h_address = 0) then
-						 rgb_test <= RED;
-					elsif int_h_address = 100 - 1 then
-						 rgb_test <= GREEN;
-					elsif int_h_address = 200 - 1 then
-						 rgb_test <= BLUE;
-					elsif int_h_address = 300 - 1 then
-						 rgb_test <= BLACK;
-					elsif int_h_address = 400 - 1 then
-						 rgb_test <= WHITE;
-					elsif int_h_address = 500 - 1 then
-						 rgb_test <= CYAN;
-					elsif int_h_address = 600 - 1 then
-						 rgb_test <= MAGENTA;
-					elsif int_h_address = 700 - 1 then
-						 rgb_test <= YELLOW;
-					else
-						 rgb_test <= rgb_test; 
-					end if;
-				end if;
-        end if;
+          if int_v_address = 0 then
+            rgb_test <= rgb_test_h_bar;
+          elsif int_v_address = 450 then
+            rgb_test <= rgb_test_v_bar;
+          else
+            rgb_test <= rgb_test;
+          end if;
+        end if;   
     end process;
- end architecture;
+    
+    
+    -- Gera imagem 800x600 de barras horizontais coloridas
+    VERTICAL_BARS:process (clk, int_v_address)
+    begin
+        if rising_edge(clk) then
+            if int_v_address = 0 then
+                 rgb_test_h_bar <= RED;
+            elsif int_v_address = 74 then
+                 rgb_test_h_bar <= GREEN;
+            elsif int_v_address = 149 then
+                 rgb_test_h_bar <= BLUE;
+            elsif int_v_address = 224 then
+                 rgb_test_h_bar <= BLACK;
+            elsif int_v_address = 299 then
+                 rgb_test_h_bar <= WHITE;
+            elsif int_v_address = 374 then
+                 rgb_test_h_bar <= CYAN;
+            elsif int_v_address = 449 then
+                 rgb_test_h_bar <= MAGENTA;
+            elsif int_v_address = 524 then
+                 rgb_test_h_bar <= YELLOW;
+            else
+                 rgb_test_h_bar <= rgb_test_h_bar; 
+            end if;
+        end if;   
+    end process;
+    
+    -- Gera imagem 800x600 de barras verticais coloridas
+    HORIZONTAL_BARS:process (clk, int_h_address)
+    begin       
+        if rising_edge(clk) then
+            if  (int_h_address = 0) then
+                 rgb_test_v_bar <= RED;
+            elsif int_h_address = 100 - 1 then
+                 rgb_test_v_bar <= GREEN;
+            elsif int_h_address = 200 - 1 then
+                 rgb_test_v_bar <= BLUE;
+            elsif int_h_address = 300 - 1 then
+                 rgb_test_v_bar <= BLACK;
+            elsif int_h_address = 400 - 1 then
+                 rgb_test_v_bar <= WHITE;
+            elsif int_h_address = 500 - 1 then
+                 rgb_test_v_bar <= CYAN;
+            elsif int_h_address = 600 - 1 then
+                 rgb_test_v_bar <= MAGENTA;
+            elsif int_h_address = 700 - 1 then
+                 rgb_test_v_bar <= YELLOW;
+            else
+                 rgb_test_v_bar <= rgb_test_v_bar; 
+            end if;
+        end if;   
+    end process;
+    
+end architecture;
