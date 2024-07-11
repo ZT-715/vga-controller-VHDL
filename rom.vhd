@@ -43,62 +43,70 @@ architecture rgb_image_50x32_12bits of rom is
     constant BROWN   : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "100010001010";
     constant D_BROWN : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "011011001011";
 
-    constant H_SHIFT: natural := 0;
-    constant V_SHIFT: natural := 0;
+    constant H_SHIFT: natural := 20;
+    constant V_SHIFT: natural := 8;
 begin
     int_h_address <= to_integer(unsigned(h_address));
     int_v_address <= to_integer(unsigned(v_address));
 
 
-    IMAGE: process(clk, int_h_address, int_v_address)
+    IMAGE: process(int_h_address, int_v_address)
     begin
-        if rising_edge(clk) then
             
-				-- TODO
-				-- Adicionar degrade RGB do endereço 0 ao 1850 pare exibir blocos
-				
-				-- Fundo			
+            -- TODO
+            -- Adicionar degrade RGB do endereço 0 ao 1850 pare exibir blocos
+            
+            -- Fundo			
             rgb_value <= WHITE;
             
             -- LINHAS PRETAS
             -- Linha 1
             if (int_v_address = 0 + V_SHIFT) and (int_h_address >= 5 + H_SHIFT) and (int_h_address <= 12 + H_SHIFT) then
                 rgb_value <= BLACK;
+                
             -- Linha 2
             elsif (int_v_address = 1 + V_SHIFT) and 
                   (((int_h_address >= 3 + H_SHIFT) and (int_h_address <= 4 + H_SHIFT)) or
                    ((int_h_address >= 13 + H_SHIFT) and (int_h_address <= 14 + H_SHIFT))) then
                 rgb_value <= BLACK;
             -- Linha 3
+            
             elsif (int_v_address = 2 + V_SHIFT) and 
                   ((int_h_address = 2 + H_SHIFT) or (int_h_address = 15 + H_SHIFT)) then
                 rgb_value <= BLACK;
             -- Linha 4
+            
             elsif (int_v_address = 3 + V_SHIFT) and 
                   ((int_h_address = 1 + H_SHIFT) or (int_h_address = 16 + H_SHIFT)) then
                 rgb_value <= BLACK;
             -- Linha 5
+            
             elsif (int_v_address = 4 + V_SHIFT) and (int_h_address = 1 + H_SHIFT) then
                 rgb_value <= BLACK;
             elsif (int_v_address = 5 + V_SHIFT) and (int_h_address >= 16 + H_SHIFT) and (int_h_address <= 18 + H_SHIFT) then
                 rgb_value <= BLACK;
             -- Lines 6 to 20 
+            
             elsif (int_h_address = 0 + H_SHIFT or int_h_address = 17 + H_SHIFT) and 
                   (int_v_address >= 5 + V_SHIFT) and (int_v_address <= 20 + V_SHIFT) then
                 rgb_value <= BLACK;
+                
             -- Linha 21
             elsif (int_v_address = 20 + V_SHIFT) and 
                   ((int_h_address = 1 + H_SHIFT) or (int_h_address = 16 + H_SHIFT)) then
                 rgb_value <= BLACK;
+                
             -- Linha 22
             elsif (int_v_address = 21 + V_SHIFT) and 
                   ((int_h_address = 2 + H_SHIFT) or (int_h_address = 17 + H_SHIFT)) then
                 rgb_value <= BLACK;
+                
             -- Linha 23
             elsif (int_v_address = 22 + V_SHIFT) and 
                   (((int_h_address = 3 + H_SHIFT) or (int_h_address = 18 + H_SHIFT)) or
                    ((int_h_address = 4 + H_SHIFT) or (int_h_address = 19 + H_SHIFT))) then
                 rgb_value <= BLACK;
+                
             -- Linha 24
             elsif (int_v_address = 23 + V_SHIFT) and 
                   (int_h_address >= 5 + H_SHIFT) and (int_h_address <= 12 + H_SHIFT) then
@@ -133,10 +141,9 @@ begin
 
             end if;
         -- Bordas
-            if int_h_address = 38 then
+            if int_h_address = 37 then
                 rgb_value <= BLACK;
             end if;
-        end if;
     end process;
 
     
