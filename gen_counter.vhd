@@ -1,3 +1,6 @@
+-- Counts a total of LIMIT values, using a bus of size
+-- defined by COUNTER_LENGHT.
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
