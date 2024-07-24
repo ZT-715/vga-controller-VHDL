@@ -24,29 +24,28 @@ begin
 					port map(rst, clk, en, y);
 					
 	process
-		variable counting: natural range 0 to 2*LIMIT := 0;
-		variable counted: natural range 0 to 2*LIMIT;
+		variable count: natural range 0 to LIMIT - 1;
 		begin
 			wait until en = '1';
-		
-			while (counting <= LIMIT) loop
-		
-					counted := to_integer(unsigned(y));
-										
-					report time'image(now) & " - " & integer'image(counting) & 
-					" vs. " & integer'image(counted);
-			
-					if(counting < LIMIT) then
-						assert counting = counted
-						severity failure;
-					else 
-						assert counted < LIMIT
-						severity failure;
-					end if;
-					
-				   wait for 20 ns;
-					counting := counting + 1;
-			end loop;
+            
+            for n in natural range 0 to 2 loop
+                for counting in natural range 0 to LIMIT - 1 loop
+                        count := to_integer(unsigned(y));
+                                            
+                        report time'image(now) & " - " & integer'image(counting) & 
+                        " vs. " & integer'image(count);
+                
+                        assert counting = count
+                        severity failure;
+                        
+                       wait for 20 ns;
+                end loop;
+                
+                report "End of cycle " & integer'image(n);
+            end loop;
+            
+            report "Success!"; -- run 6050 ns
+            
 			wait;
 	end process;
 end architecture;
