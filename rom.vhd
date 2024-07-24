@@ -38,13 +38,15 @@ architecture rgb_image_50x32_12bits of rom is
 
     constant BLACK   : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "000000000000";
     constant WHITE   : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "111111111111";
-    constant GREY    : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "100010001000";
+    constant GREY    : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "110011001100";
     constant L_BROWN : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "101010001000";
     constant BROWN   : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "100010001010";
     constant D_BROWN : std_logic_vector(VALUE_LENGTH - 1 downto 0) := "011011001011";
 
-    constant H_SHIFT: natural := 20;
-    constant V_SHIFT: natural := 8;
+    constant H_SHIFT: natural := 12;
+    constant V_SHIFT: natural := 12;
+    
+    constant RGB_SHIFT: natural := (2**VALUE_LENGTH - 1)/(H_ADDRESS_END*V_ADDRESS_END);
 begin
     int_h_address <= to_integer(unsigned(h_address));
     int_v_address <= to_integer(unsigned(v_address));
@@ -57,91 +59,81 @@ begin
             -- Adicionar degrade RGB do endereço 0 ao 1850 pare exibir blocos
             
             -- Fundo			
-            rgb_value <= WHITE;
+            --rgb_value <= std_logic_vector(to_unsigned(int_h_address*int_v_address*RGB_SHIFT, VALUE_LENGTH));
+            rgb_value <= std_logic_vector(to_unsigned(H_ADDRESS_END*V_ADDRESS_END*RGB_SHIFT, VALUE_LENGTH));
             
-            -- LINHAS PRETAS
-            -- Linha 1
-            if (int_v_address = 0 + V_SHIFT) and (int_h_address >= 5 + H_SHIFT) and (int_h_address <= 12 + H_SHIFT) then
-                rgb_value <= BLACK;
-                
-            -- Linha 2
-            elsif (int_v_address = 1 + V_SHIFT) and 
-                  (((int_h_address >= 3 + H_SHIFT) and (int_h_address <= 4 + H_SHIFT)) or
-                   ((int_h_address >= 13 + H_SHIFT) and (int_h_address <= 14 + H_SHIFT))) then
-                rgb_value <= BLACK;
-            -- Linha 3
+            -- Linha fumaça 1
+            if (int_v_address >= 0 + V_SHIFT) and (int_v_address <= 2 + V_SHIFT) then
+                if (int_h_address = 3 + H_SHIFT) or (int_h_address = 3 + 2 + H_SHIFT) then
+                    rgb_value <= WHITE;
+                end if;
+            end if;          
             
-            elsif (int_v_address = 2 + V_SHIFT) and 
-                  ((int_h_address = 2 + H_SHIFT) or (int_h_address = 15 + H_SHIFT)) then
-                rgb_value <= BLACK;
-            -- Linha 4
+            -- Linha fumaça 2
+            if (int_v_address >= 3 + V_SHIFT) and (int_v_address <= 5 + V_SHIFT) then
+                if (int_h_address = 4 + H_SHIFT) or (int_h_address = 4 + 2 + H_SHIFT) then
+                    rgb_value <= GREY;
+                end if;
+            end if;          
+                   
             
-            elsif (int_v_address = 3 + V_SHIFT) and 
-                  ((int_h_address = 1 + H_SHIFT) or (int_h_address = 16 + H_SHIFT)) then
-                rgb_value <= BLACK;
-            -- Linha 5
-            
-            elsif (int_v_address = 4 + V_SHIFT) and (int_h_address = 1 + H_SHIFT) then
-                rgb_value <= BLACK;
-            elsif (int_v_address = 5 + V_SHIFT) and (int_h_address >= 16 + H_SHIFT) and (int_h_address <= 18 + H_SHIFT) then
-                rgb_value <= BLACK;
-            -- Lines 6 to 20 
-            
-            elsif (int_h_address = 0 + H_SHIFT or int_h_address = 17 + H_SHIFT) and 
-                  (int_v_address >= 5 + V_SHIFT) and (int_v_address <= 20 + V_SHIFT) then
-                rgb_value <= BLACK;
-                
-            -- Linha 21
-            elsif (int_v_address = 20 + V_SHIFT) and 
-                  ((int_h_address = 1 + H_SHIFT) or (int_h_address = 16 + H_SHIFT)) then
-                rgb_value <= BLACK;
-                
-            -- Linha 22
-            elsif (int_v_address = 21 + V_SHIFT) and 
-                  ((int_h_address = 2 + H_SHIFT) or (int_h_address = 17 + H_SHIFT)) then
-                rgb_value <= BLACK;
-                
-            -- Linha 23
-            elsif (int_v_address = 22 + V_SHIFT) and 
-                  (((int_h_address = 3 + H_SHIFT) or (int_h_address = 18 + H_SHIFT)) or
-                   ((int_h_address = 4 + H_SHIFT) or (int_h_address = 19 + H_SHIFT))) then
-                rgb_value <= BLACK;
-                
-            -- Linha 24
-            elsif (int_v_address = 23 + V_SHIFT) and 
-                  (int_h_address >= 5 + H_SHIFT) and (int_h_address <= 12 + H_SHIFT) then
-                rgb_value <= BLACK;
-            
-
-            -- CIRCULO
-            elsif (int_v_address >= 3 + V_SHIFT) and (int_v_address <= 7 + V_SHIFT) and
-                  ((int_v_address = 3 + V_SHIFT and int_h_address >= 7 + H_SHIFT and int_h_address <= 10 + H_SHIFT) or
-                   (int_v_address = 4 + V_SHIFT and int_h_address >= 5 + H_SHIFT and int_h_address <= 11 + H_SHIFT) or
-                   (int_v_address >= 5 + V_SHIFT and int_v_address <= 6 + V_SHIFT and int_h_address >= 4 + H_SHIFT and int_h_address <= 11 + H_SHIFT) or
-                   (int_v_address = 7 + V_SHIFT and int_h_address >= 5 + H_SHIFT and int_h_address <= 12 + H_SHIFT)) then
-                rgb_value <= BLACK;
-
-            -- FIM PRETO
-            -- CIRCULO MARROM ESCURO
-            elsif (int_v_address >= 3 + V_SHIFT) and (int_v_address <= 6 + V_SHIFT) and
-                  ((int_v_address = 3 + V_SHIFT and int_h_address >= 7 + H_SHIFT and int_h_address <= 10 + H_SHIFT) or
-                   (int_v_address = 4 + V_SHIFT and int_h_address >= 5 + H_SHIFT and int_h_address <= 11 + H_SHIFT) or
-                   (int_v_address >= 5 + V_SHIFT and int_v_address <= 6 + V_SHIFT and int_h_address >= 4 + H_SHIFT and int_h_address <= 11 + H_SHIFT) or
-                   (int_v_address = 6 + V_SHIFT and int_h_address >= 5 + H_SHIFT and int_h_address <= 12 + H_SHIFT)) then
-                rgb_value <= D_BROWN;
-	    -- CIRCULO MARROM ESCURO
-
-	    -- DETALHES MARROM
-
-        -- FIM DETALHES MARROM
-
-	    -- DETALHES MARROM CALRO
-
-        -- FIM DETALHES MARROM CLARO
-
+            -- Linha Chícara1
+            if (int_v_address = 0 + 10 + V_SHIFT) then
+                if (int_h_address = 1 + H_SHIFT) or (int_h_address = 8 + H_SHIFT) then
+                    rgb_value <= BLACK;
+                elsif (int_h_address > 1 + H_SHIFT and int_h_address < 8 + H_SHIFT) then
+                    rgb_value <= BROWN;
+                end if;
             end if;
-        -- Bordas
-            if int_h_address = 37 then
+            
+            -- Linha Chícara2
+            if (int_v_address = 1 + 10 + V_SHIFT) then
+                if (int_h_address = 0 + H_SHIFT) or 
+                   (int_h_address >= 2 + H_SHIFT and int_h_address <= 7 + H_SHIFT) or
+                   (int_h_address = 9 + H_SHIFT) then
+                    rgb_value <= BLACK;
+                elsif int_h_address = 1 + H_SHIFT then
+                    rgb_value <= WHITE;
+                elsif int_h_address = 8 + H_SHIFT then
+                    rgb_value <= GREY;
+                end if;
+            end if;
+            
+             -- Linha Chícara2 - 6
+            if (int_v_address >= 2 + 10 + V_SHIFT) and (int_v_address <= 5 + 10 + V_SHIFT) then
+                if (int_h_address = 0 + H_SHIFT) or (int_h_address = 9 + H_SHIFT) then
+                    rgb_value <= BLACK;
+                elsif (int_h_address >= 1 + H_SHIFT) and (int_h_address <= 6 + H_SHIFT) then
+                    rgb_value <= WHITE;
+                elsif (int_h_address = 7 + H_SHIFT) or (int_h_address = 8 + H_SHIFT) then
+                    rgb_value <= GREY;
+                end if;
+            end if;          
+
+             -- Linha Chícara7
+            if (int_v_address = 6 + 10 + V_SHIFT) then
+                if (int_h_address = 1 + H_SHIFT) or (int_h_address = 8 + H_SHIFT) then
+                    rgb_value <= BLACK;
+                elsif int_h_address >= 2 + H_SHIFT and int_h_address <= 6 + H_SHIFT then
+                    rgb_value <= WHITE;
+                elsif int_h_address = 7 + H_SHIFT then
+                    rgb_value <= GREY;
+                end if;
+            end if;                      
+
+             -- Linha Chícara8
+            if (int_v_address = 7 + 10 + V_SHIFT) then
+                    rgb_value <= BLACK;
+            end if;   
+            
+            -- Bordas
+            if (int_h_address = 37) or (int_h_address = 38) then
+                rgb_value <= BLACK;
+            end if;
+            
+            
+            -- Bordas
+            if (int_v_address = 37) or (int_v_address = 38) then
                 rgb_value <= BLACK;
             end if;
     end process;
