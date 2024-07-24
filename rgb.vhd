@@ -29,8 +29,8 @@ architecture imp of rgb is
     signal rgb_test_h_bar: std_logic_vector(DATA_BUS - 1 downto 0);
     signal rgb_out: std_logic_vector(DATA_BUS - 1 downto 0);
 
-    signal int_h_address: natural range 0 to H_BUS;
-    signal int_v_address: natural range 0 to V_BUS;
+    signal int_h_address: natural range 0 to 2**H_BUS;
+    signal int_v_address: natural range 0 to 2**V_BUS;
 
     constant COLOR_LENGTH: natural := DATA_BUS/3;
 
@@ -60,17 +60,13 @@ begin
     -- Gera imagem de saída composta de 2 fontes, 
     -- barras versticais até o endereço vertical 449
     -- barras horizontais posteriormente.
-    TEST_IMAGE_OUT:process (clk, int_v_address, int_h_address)
+    TEST_IMAGE_OUT:process (int_v_address, int_h_address)
     begin
-        if rising_edge(clk) then
-          if int_v_address = 0 then
+          if (int_v_address >= 0) and (int_v_address <= 448) then
             rgb_test <= rgb_test_h_bar;
-          elsif int_v_address = 450 then
+          else 
             rgb_test <= rgb_test_v_bar;
-          else
-            rgb_test <= rgb_test;
           end if;
-        end if;   
     end process;
     
     
@@ -78,7 +74,7 @@ begin
     VERTICAL_BARS:process (clk, int_v_address)
     begin
         if rising_edge(clk) then
-            if int_v_address = 0 then
+            if (int_v_address = 599) then
                  rgb_test_h_bar <= RED;
             elsif int_v_address = 74 then
                  rgb_test_h_bar <= GREEN;
@@ -104,7 +100,7 @@ begin
     HORIZONTAL_BARS:process (clk, int_h_address)
     begin       
         if rising_edge(clk) then
-            if  (int_h_address = 0) then
+            if  (int_h_address = 799) then
                  rgb_test_v_bar <= RED;
             elsif int_h_address = 100 - 1 then
                  rgb_test_v_bar <= GREEN;
