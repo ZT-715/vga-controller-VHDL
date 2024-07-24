@@ -1,3 +1,11 @@
+-- Generates an low pusle w/ defined segments of time.
+
+-- HIGH_START_COUNT is the length of the initial high period
+-- LOW_COUNT is the length of the active low pulse, which ends
+-- and the output returns to high to complete the cycle period 
+-- defined in TOTAL_COUNT, when the counter hits it's LIMIT.
+
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -6,18 +14,15 @@ use ieee.numeric_std.all;
 entity gen_sync is
     generic(
     -- pixel count of each interval
-		  HIGH_START_COUNT: natural := 56; 
-        LOW_COUNT: natural := 120;
-		  TOTAL_COUNT: natural := 1040;
+            HIGH_START_COUNT: natural := 56; 
+            LOW_COUNT: natural := 120;
+            TOTAL_COUNT: natural := 1040;
 		  
-        COUNTER_LENGTH: natural := 11
-    );
-
+            COUNTER_LENGTH: natural := 11);
     port(
-        rst, clk: in std_logic; 
-		  c: in std_logic_vector(COUNTER_LENGTH-1 downto 0);
-        sync: out std_logic
-    );
+         rst, clk: in std_logic; 
+		 c: in std_logic_vector(COUNTER_LENGTH-1 downto 0);
+         sync: out std_logic);
 	 
 end entity gen_sync;
 
