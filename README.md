@@ -2,6 +2,8 @@
 
 #### Project Overview
 This project implements a VGA (Video Graphics Array) controller with a resolution of **800x600 pixels at 72 Hz** using **VHDL**. The system is programmed onto an **Altera Cyclone III FPGA (DE0 Board)** and supports RGB outputs with 4096 colors.
+![alt text](https://github.com/ZT-715/vga-controller-VHDL/blob/master/Terceiro%20teste%20-%20gradiente.png?raw=true)
+
 
 #### Implementation Highlights
 - Designed using **Register Transfer Level (RTL)** methodology.
@@ -30,6 +32,8 @@ This project implements a VGA (Video Graphics Array) controller with a resolutio
 
 #### Final Output
 The VGA controller displays a demonstration image and test patterns, validating its functionality and modular design approach.
+![alt text](https://github.com/ZT-715/vga-controller-VHDL/blob/master/Segundo%20teste%20-%20barras%20coloridas.png?raw=true)
+![alt text](https://github.com/ZT-715/vga-controller-VHDL/blob/master/imagem%20final.png?raw=true)
 
 #### Tools and Resources
 - **Quartus II 13.1** for synthesis and FPGA programming.
