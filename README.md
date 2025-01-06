@@ -25,17 +25,17 @@ This project implements a VGA (Video Graphics Array) controller with a resolutio
    - Signal validation with an oscilloscope.
    - On-board testing with VGA monitors.
 
-#### Next Steps
-1. Refactor the `rgb` component for independent testing.
-2. Use constant-based configuration instead of extensive generic parameters.
-3. Modularize further to separate sync signal generation and address handling.
-
-#### Final Output
+#### Final Result
 The VGA controller displays a demonstration image and test patterns, validating its functionality and modular design approach.
 ![alt text](https://github.com/ZT-715/vga-controller-VHDL/blob/master/Segundo%20teste%20-%20barras%20coloridas.png?raw=true)
 ![alt text](https://github.com/ZT-715/vga-controller-VHDL/blob/master/imagem%20final.png?raw=true)
 
+#### Next Steps
+1. Refactor the `rgb` component for independent testing.
+2. Complete generic parameters implementation by adding automatic calculations so the controller becomes 100% generic.
+3. Modularize further to separate sync signal generation and address handling.
+
 #### Tools and Resources
 - **Quartus II 13.1** for synthesis and FPGA programming.
 - **ModelSim 10.1** for simulations.
-- **Cyclone III FPGA DE0 Board** for hardware validation.
+- **Cyclone III FPGA DE0 Board**.
